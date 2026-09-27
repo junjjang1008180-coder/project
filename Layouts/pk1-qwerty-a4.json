@@ -1,0 +1,750 @@
+{
+  "id": "PK1",
+  "name": "QWERTY · A4 가로",
+  "version": 1,
+  "paper": {
+    "width": 297.0,
+    "height": 210.0
+  },
+  "markers": [
+    {
+      "id": "PK1-TL",
+      "center": [
+        24.0,
+        24.0
+      ],
+      "size": 26.0
+    },
+    {
+      "id": "PK1-TC",
+      "center": [
+        148.5,
+        24.0
+      ],
+      "size": 26.0
+    },
+    {
+      "id": "PK1-TR",
+      "center": [
+        273.0,
+        24.0
+      ],
+      "size": 26.0
+    },
+    {
+      "id": "PK1-BL",
+      "center": [
+        24.0,
+        186.0
+      ],
+      "size": 26.0
+    },
+    {
+      "id": "PK1-BC",
+      "center": [
+        148.5,
+        186.0
+      ],
+      "size": 26.0
+    },
+    {
+      "id": "PK1-BR",
+      "center": [
+        273.0,
+        186.0
+      ],
+      "size": 26.0
+    }
+  ],
+  "keys": [
+    {
+      "id": "digit1",
+      "label": "1",
+      "alt": "!",
+      "action": {
+        "type": "char",
+        "value": "1",
+        "shift": "!"
+      },
+      "rect": [
+        17.25,
+        48.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "digit2",
+      "label": "2",
+      "alt": "@",
+      "action": {
+        "type": "char",
+        "value": "2",
+        "shift": "@"
+      },
+      "rect": [
+        40.25,
+        48.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "digit3",
+      "label": "3",
+      "alt": "#",
+      "action": {
+        "type": "char",
+        "value": "3",
+        "shift": "#"
+      },
+      "rect": [
+        63.25,
+        48.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "digit4",
+      "label": "4",
+      "alt": "$",
+      "action": {
+        "type": "char",
+        "value": "4",
+        "shift": "$"
+      },
+      "rect": [
+        86.25,
+        48.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "digit5",
+      "label": "5",
+      "alt": "%",
+      "action": {
+        "type": "char",
+        "value": "5",
+        "shift": "%"
+      },
+      "rect": [
+        109.25,
+        48.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "digit6",
+      "label": "6",
+      "alt": "^",
+      "action": {
+        "type": "char",
+        "value": "6",
+        "shift": "^"
+      },
+      "rect": [
+        132.25,
+        48.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "digit7",
+      "label": "7",
+      "alt": "&",
+      "action": {
+        "type": "char",
+        "value": "7",
+        "shift": "&"
+      },
+      "rect": [
+        155.25,
+        48.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "digit8",
+      "label": "8",
+      "alt": "*",
+      "action": {
+        "type": "char",
+        "value": "8",
+        "shift": "*"
+      },
+      "rect": [
+        178.25,
+        48.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "digit9",
+      "label": "9",
+      "alt": "(",
+      "action": {
+        "type": "char",
+        "value": "9",
+        "shift": "("
+      },
+      "rect": [
+        201.25,
+        48.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "digit0",
+      "label": "0",
+      "alt": ")",
+      "action": {
+        "type": "char",
+        "value": "0",
+        "shift": ")"
+      },
+      "rect": [
+        224.25,
+        48.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "backspace",
+      "label": "Backspace",
+      "action": {
+        "type": "backspace"
+      },
+      "rect": [
+        247.25,
+        48.5,
+        32.5,
+        21.0
+      ]
+    },
+    {
+      "id": "q",
+      "label": "Q",
+      "alt": "ㅂ",
+      "action": {
+        "type": "char",
+        "value": "q",
+        "shift": "Q"
+      },
+      "rect": [
+        28.75,
+        71.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "w",
+      "label": "W",
+      "alt": "ㅈ",
+      "action": {
+        "type": "char",
+        "value": "w",
+        "shift": "W"
+      },
+      "rect": [
+        51.75,
+        71.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "e",
+      "label": "E",
+      "alt": "ㄷ",
+      "action": {
+        "type": "char",
+        "value": "e",
+        "shift": "E"
+      },
+      "rect": [
+        74.75,
+        71.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "r",
+      "label": "R",
+      "alt": "ㄱ",
+      "action": {
+        "type": "char",
+        "value": "r",
+        "shift": "R"
+      },
+      "rect": [
+        97.75,
+        71.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "t",
+      "label": "T",
+      "alt": "ㅅ",
+      "action": {
+        "type": "char",
+        "value": "t",
+        "shift": "T"
+      },
+      "rect": [
+        120.75,
+        71.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "y",
+      "label": "Y",
+      "alt": "ㅛ",
+      "action": {
+        "type": "char",
+        "value": "y",
+        "shift": "Y"
+      },
+      "rect": [
+        143.75,
+        71.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "u",
+      "label": "U",
+      "alt": "ㅕ",
+      "action": {
+        "type": "char",
+        "value": "u",
+        "shift": "U"
+      },
+      "rect": [
+        166.75,
+        71.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "i",
+      "label": "I",
+      "alt": "ㅑ",
+      "action": {
+        "type": "char",
+        "value": "i",
+        "shift": "I"
+      },
+      "rect": [
+        189.75,
+        71.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "o",
+      "label": "O",
+      "alt": "ㅐ",
+      "action": {
+        "type": "char",
+        "value": "o",
+        "shift": "O"
+      },
+      "rect": [
+        212.75,
+        71.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "p",
+      "label": "P",
+      "alt": "ㅔ",
+      "action": {
+        "type": "char",
+        "value": "p",
+        "shift": "P"
+      },
+      "rect": [
+        235.75,
+        71.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "a",
+      "label": "A",
+      "alt": "ㅁ",
+      "action": {
+        "type": "char",
+        "value": "a",
+        "shift": "A"
+      },
+      "rect": [
+        34.5,
+        94.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "s",
+      "label": "S",
+      "alt": "ㄴ",
+      "action": {
+        "type": "char",
+        "value": "s",
+        "shift": "S"
+      },
+      "rect": [
+        57.5,
+        94.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "d",
+      "label": "D",
+      "alt": "ㅇ",
+      "action": {
+        "type": "char",
+        "value": "d",
+        "shift": "D"
+      },
+      "rect": [
+        80.5,
+        94.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "f",
+      "label": "F",
+      "alt": "ㄹ",
+      "action": {
+        "type": "char",
+        "value": "f",
+        "shift": "F"
+      },
+      "rect": [
+        103.5,
+        94.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "g",
+      "label": "G",
+      "alt": "ㅎ",
+      "action": {
+        "type": "char",
+        "value": "g",
+        "shift": "G"
+      },
+      "rect": [
+        126.5,
+        94.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "h",
+      "label": "H",
+      "alt": "ㅗ",
+      "action": {
+        "type": "char",
+        "value": "h",
+        "shift": "H"
+      },
+      "rect": [
+        149.5,
+        94.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "j",
+      "label": "J",
+      "alt": "ㅓ",
+      "action": {
+        "type": "char",
+        "value": "j",
+        "shift": "J"
+      },
+      "rect": [
+        172.5,
+        94.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "k",
+      "label": "K",
+      "alt": "ㅏ",
+      "action": {
+        "type": "char",
+        "value": "k",
+        "shift": "K"
+      },
+      "rect": [
+        195.5,
+        94.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "l",
+      "label": "L",
+      "alt": "ㅣ",
+      "action": {
+        "type": "char",
+        "value": "l",
+        "shift": "L"
+      },
+      "rect": [
+        218.5,
+        94.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "enter",
+      "label": "Enter",
+      "action": {
+        "type": "enter"
+      },
+      "rect": [
+        241.5,
+        94.5,
+        38.25,
+        21.0
+      ]
+    },
+    {
+      "id": "shift",
+      "label": "Shift",
+      "action": {
+        "type": "shift"
+      },
+      "rect": [
+        17.25,
+        117.5,
+        26.75,
+        21.0
+      ]
+    },
+    {
+      "id": "z",
+      "label": "Z",
+      "alt": "ㅋ",
+      "action": {
+        "type": "char",
+        "value": "z",
+        "shift": "Z"
+      },
+      "rect": [
+        46.0,
+        117.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "x",
+      "label": "X",
+      "alt": "ㅌ",
+      "action": {
+        "type": "char",
+        "value": "x",
+        "shift": "X"
+      },
+      "rect": [
+        69.0,
+        117.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "c",
+      "label": "C",
+      "alt": "ㅊ",
+      "action": {
+        "type": "char",
+        "value": "c",
+        "shift": "C"
+      },
+      "rect": [
+        92.0,
+        117.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "v",
+      "label": "V",
+      "alt": "ㅍ",
+      "action": {
+        "type": "char",
+        "value": "v",
+        "shift": "V"
+      },
+      "rect": [
+        115.0,
+        117.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "b",
+      "label": "B",
+      "alt": "ㅠ",
+      "action": {
+        "type": "char",
+        "value": "b",
+        "shift": "B"
+      },
+      "rect": [
+        138.0,
+        117.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "n",
+      "label": "N",
+      "alt": "ㅜ",
+      "action": {
+        "type": "char",
+        "value": "n",
+        "shift": "N"
+      },
+      "rect": [
+        161.0,
+        117.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "m",
+      "label": "M",
+      "alt": "ㅡ",
+      "action": {
+        "type": "char",
+        "value": "m",
+        "shift": "M"
+      },
+      "rect": [
+        184.0,
+        117.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "comma",
+      "label": ",",
+      "alt": "<",
+      "action": {
+        "type": "char",
+        "value": ",",
+        "shift": "<"
+      },
+      "rect": [
+        207.0,
+        117.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "period",
+      "label": ".",
+      "alt": ">",
+      "action": {
+        "type": "char",
+        "value": ".",
+        "shift": ">"
+      },
+      "rect": [
+        230.0,
+        117.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "slash",
+      "label": "/",
+      "alt": "?",
+      "action": {
+        "type": "char",
+        "value": "/",
+        "shift": "?"
+      },
+      "rect": [
+        253.0,
+        117.5,
+        21.0,
+        21.0
+      ]
+    },
+    {
+      "id": "lang",
+      "label": "한/영",
+      "action": {
+        "type": "languageToggle"
+      },
+      "rect": [
+        46.0,
+        140.5,
+        32.5,
+        21.0
+      ]
+    },
+    {
+      "id": "space",
+      "label": "Space",
+      "action": {
+        "type": "space"
+      },
+      "rect": [
+        80.5,
+        140.5,
+        147.5,
+        21.0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+# XcodeGen 프로젝트 정의 — `xcodegen generate` 로 PaperKeyboard.xcodeproj 를 만든다.
+# (.xcodeproj 는 생성물이라 git에 넣지 않는다)
+name: PaperKeyboard
+options:
+  deploymentTarget:
+    iOS: "17.0"   # 외장 카메라(AVCaptureDevice.DeviceType.external), RotationCoordinator
+  createIntermediateGroups: true
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "2"   # iPad
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: $(PK_DEVELOPMENT_TEAM)
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  PaperKeyboard:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+      - path: Shared
+      - path: Layouts
+        buildPhase: resources
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: 종이 키보드
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSCameraUsageDescription: 종이 키보드와 손가락을 인식하기 위해 카메라를 사용합니다. 영상은 기기 밖으로 전송되지 않습니다.
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(PK_BUNDLE_ID_PREFIX).paperkeyboard
+    scheme:
+      testTargets:
+        - PaperKeyboardTests
+
+  PaperKeyboardTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+      - path: Shared
+      - path: Layouts
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(PK_BUNDLE_ID_PREFIX).paperkeyboard.tests
+        GENERATE_INFOPLIST_FILE: YES

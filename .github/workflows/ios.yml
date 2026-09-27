@@ -1,0 +1,42 @@
+# Mac 없이도 컴파일/단위 테스트를 확인하기 위한 GitHub Actions (macOS 러너).
+# 서명 없이 빌드만 한다 — 실기기 설치는 Mac의 Xcode에서 해야 한다.
+name: iOS build & test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build for iPad (unsigned)
+        run: |
+          xcodebuild build \
+            -project PaperKeyboard.xcodeproj \
+            -scheme PaperKeyboard \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Unit tests (iPad simulator)
+        run: |
+          SIM_ID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          ipads = [d for runtime, ds in devices.items() if "iOS" in runtime for d in ds if "iPad" in d["name"]]
+          print(ipads[-1]["udid"])
+          ')
+          xcodebuild test \
+            -project PaperKeyboard.xcodeproj \
+            -scheme PaperKeyboard \
+            -destination "id=$SIM_ID" \
+            CODE_SIGNING_ALLOWED=NO
