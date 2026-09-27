@@ -1,0 +1,11 @@
+// 서명 설정. (이 파일만 고치면 되고 xcodegen을 다시 돌릴 필요는 없습니다)
+
+// Team ID (10자리). 비워 두면 Xcode의 Signing & Capabilities 탭에서 "(이름) (Personal Team)"을 고르면 됩니다.
+// 무료 Apple ID로 충분합니다 (유료 개발자 계정은 App Store 배포할 때만 필요).
+// 한 번 고른 뒤 아래 명령으로 나온 10자리 값을 여기 적어 두면, 프로젝트를 다시 생성해도 유지됩니다:
+//   grep -oE 'DEVELOPMENT_TEAM = [A-Z0-9]{10};' PaperKeyboard.xcodeproj/project.pbxproj | head -1
+PK_DEVELOPMENT_TEAM =
+
+// 번들 ID 앞부분. 무료 계정은 전 세계에서 겹치지 않아야 합니다.
+// 서명 오류("is not available")가 나면 뒤에 숫자를 붙여 바꾸세요.
+PK_BUNDLE_ID_PREFIX = io.github.junjjang1008180

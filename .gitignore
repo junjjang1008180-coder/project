@@ -1,0 +1,15 @@
+# Xcode / XcodeGen 생성물
+*.xcodeproj/
+App/Info.plist
+DerivedData/
+build/
+xcuserdata/
+*.xcuserstate
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/

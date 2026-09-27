@@ -1,0 +1,69 @@
+# Mac 없이도 컴파일/단위 테스트를 확인하기 위한 GitHub Actions (macOS 러너).
+# 서명 없이 빌드만 한다 — 실기기 설치는 Mac의 Xcode에서 해야 한다.
+# 사용자의 Mac에 어떤 Xcode가 깔려 있어도 되도록 여러 버전으로 빌드한다.
+name: iOS build & test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Xcode 16 (macOS 15)
+            runner: macos-15
+            xcode: default
+          - name: Xcode 26 (macOS 26)
+            runner: macos-26
+            xcode: default
+          - name: Newest Xcode on runner (macOS 26)
+            runner: macos-26
+            xcode: newest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        if: matrix.xcode == 'newest'
+        run: |
+          NEWEST=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          echo "Using $NEWEST"
+          sudo xcode-select -s "$NEWEST"
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build for iPad (unsigned)
+        run: |
+          xcodebuild build \
+            -project PaperKeyboard.xcodeproj \
+            -scheme PaperKeyboard \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Unit tests (iPad simulator)
+        # 가장 새 Xcode(베타일 수 있음)는 시뮬레이터 런타임이 없을 수 있어 테스트 실패를 허용한다.
+        continue-on-error: ${{ matrix.xcode == 'newest' }}
+        run: |
+          SIM_ID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          ipads = [d for runtime, ds in devices.items() if "iOS" in runtime for d in ds if "iPad" in d["name"]]
+          print(ipads[-1]["udid"])
+          ')
+          xcodebuild test \
+            -project PaperKeyboard.xcodeproj \
+            -scheme PaperKeyboard \
+            -destination "id=$SIM_ID" \
+            CODE_SIGNING_ALLOWED=NO
