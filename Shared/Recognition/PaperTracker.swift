@@ -8,6 +8,8 @@ struct DetectedMarker: Equatable {
     var corners: [CGPoint]
     /// 대각선 교점으로 구한 마커 중심.
     var center: CGPoint
+    /// 검출 신뢰도 (같은 마커가 여러 번 잡히면 높은 쪽을 쓴다).
+    var confidence: Float = 1
 }
 
 /// 검출된 마커로 "템플릿(mm) → 이미지(정규화 좌표)" 호모그래피를 추정하고 흔들림을 줄인다.
@@ -46,7 +48,10 @@ final class PaperTracker {
     /// 한 번에 이보다 크게(px) 움직이면 종이를 옮긴 것으로 보고 즉시 따라간다.
     var snapThresholdPx: CGFloat = 25
     var holdTimeout: TimeInterval = 0.5
-    var maxReprojectionErrorPx: Double = 8
+    /// 마커 중심 재투영 RMS 오차 허용치 (이미지 대각선 대비 비율, 1080p에서 약 33px).
+    /// 광각 웹캠의 렌즈 왜곡(가장자리가 휘어 보임)은 평면 호모그래피로 완전히 맞지 않으므로 넉넉히 둔다.
+    /// 잘못 잡힌 마커처럼 크게 어긋난 경우만 거른다.
+    var maxReprojectionErrorFraction: Double = 0.015
 
     private(set) var estimate: Estimate?
     private(set) var lastUpdateTime: TimeInterval?
@@ -87,9 +92,10 @@ final class PaperTracker {
         }
 
         let error = Self.rmsErrorPx(h, templatePoints, imagePoints, imageSize)
-        guard error <= maxReprojectionErrorPx else {
+        let limit = maxReprojectionErrorFraction * Double(hypot(imageSize.width, imageSize.height))
+        guard error <= limit else {
             return Update(usedMarkerIDs: used, reprojectionErrorPx: error,
-                          rejectedReason: String(format: "재투영 오차가 큼 (%.1fpx)", error))
+                          rejectedReason: String(format: "재투영 오차가 큼 (%.1fpx > 허용 %.0fpx)", error, limit))
         }
         guard let corners = h.apply(layout.paperCorners), Geometry.isConvexQuad(corners) else {
             return Update(usedMarkerIDs: used, reprojectionErrorPx: error, rejectedReason: "종이 모양이 비정상")

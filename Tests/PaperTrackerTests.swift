@@ -96,10 +96,25 @@ final class PaperTrackerTests: XCTestCase {
         let layout = try layout()
         let tracker = PaperTracker(layout: layout)
         var markers = try observedMarkers(layout)
-        // 한 마커를 크게 어긋나게 → 재투영 오차가 커서 거부
-        markers[0].center.x += 0.05
+        // 한 마커를 크게(480px) 어긋나게 → 재투영 오차(약 79px)가 허용치(약 33px)를 넘어 거부
+        markers[0].center.x += 0.25
         let update = tracker.update(markers: markers, imageSize: imageSize, time: 1)
         XCTAssertNotNil(update.rejectedReason)
         XCTAssertNil(tracker.estimate)
+    }
+
+    func testAcceptsLensDistortionSizedErrors() throws {
+        // 광각 웹캠 왜곡 정도(마커마다 ±6px)는 받아들여야 한다 (RMS 약 5.7px).
+        let layout = try layout()
+        let tracker = PaperTracker(layout: layout)
+        var markers = try observedMarkers(layout)
+        let offsets: [(CGFloat, CGFloat)] = [(6, -6), (0, 6), (-6, -6), (6, 6), (0, -6), (-6, 6)]
+        for i in markers.indices {
+            markers[i].center.x += offsets[i].0 / imageSize.width
+            markers[i].center.y += offsets[i].1 / imageSize.height
+        }
+        let update = tracker.update(markers: markers, imageSize: imageSize, time: 1)
+        XCTAssertNil(update.rejectedReason)
+        XCTAssertNotNil(tracker.estimate)
     }
 }

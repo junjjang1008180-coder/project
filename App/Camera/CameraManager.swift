@@ -67,6 +67,22 @@ final class CameraManager: NSObject, ObservableObject {
         }
     }
 
+    /// 진단 정보용 짧은 상태 이름
+    var statusSummary: String {
+        switch status {
+        case .idle: return "준비 중"
+        case .unauthorized: return "권한 없음"
+        case .noCamera: return "카메라 없음"
+        case .running: return "실행 중"
+        case .interrupted: return "중단됨"
+        case .failed: return "오류"
+        }
+    }
+
+    var selectedCameraName: String? {
+        cameras.first { $0.id == selectedCameraID }?.name
+    }
+
     // MARK: - 공개 동작
 
     func start() {
@@ -99,6 +115,10 @@ final class CameraManager: NSObject, ObservableObject {
     private func configureAndStart() {
         if !isConfigured {
             isConfigured = true
+            // 전면 카메라의 센터 스테이지가 화면을 자동으로 움직이면 종이 보정이 흔들리므로 끈다.
+            AVCaptureDevice.centerStageControlMode = .app
+            AVCaptureDevice.isCenterStageEnabled = false
+
             session.beginConfiguration()
             // 풀레인지 YUV: Vision과 Core Image가 추가 변환 없이 바로 쓴다.
             let format = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
@@ -220,10 +240,12 @@ final class CameraManager: NSObject, ObservableObject {
         let hasInput = currentInput != nil
         DispatchQueue.main.async {
             if !hasInput {
+                // 카메라를 여는 데 실패한 경우엔 그 이유를 그대로 보여 준다.
+                if case .failed = self.status { return }
                 self.status = .noCamera
-            } else if running, case .interrupted = self.status {
-                // 중단 해제 알림이 오면 running으로 바뀐다
             } else if running {
+                // 중단 중이면 중단 해제 알림이 올 때 running으로 바뀐다.
+                if case .interrupted = self.status { return }
                 self.status = .running
             }
         }

@@ -13,8 +13,12 @@ final class FrameProcessor: ObservableObject {
         var trackerState: PaperTracker.State = .searching
         var isLocked = false
         var imageSize: CGSize = .zero
-        /// 마지막 검출에서 찾은 마커 (정규화 이미지 좌표)
+        /// 마지막 검출에서 찾은 마커 (정규화 이미지 좌표). 보정 고정 중에는 비운다.
         var markers: [DetectedMarker] = []
+        /// 마지막 검출에서 못 찾은 마커 ID
+        var missingMarkerIDs: [String] = []
+        /// 마지막 검출에서 전체 프레임 외에 추가로 잘라 본 횟수
+        var extraPasses = 0
         /// 종이 외곽 (정규화 이미지 좌표)
         var paperQuad: [CGPoint]?
         /// 템플릿의 각 키를 이미지에 투영한 사각형
@@ -55,6 +59,9 @@ final class FrameProcessor: ObservableObject {
     private var lastMarkers: [DetectedMarker] = []
     private var lastUpdate: PaperTracker.Update?
     private var lastDetectionMs: Double?
+    private var lastExtraPasses = 0
+    private var lastTileSearchTime: TimeInterval = 0
+    private var fallbackCursor = 0
 
     // MARK: 메인 ↔ 비디오 큐 공유 값
     private struct Control {
@@ -101,7 +108,7 @@ final class FrameProcessor: ObservableObject {
         if !locked, now - lastDetectionTime >= detectionInterval {
             lastDetectionTime = now
             let start = CACurrentMediaTime()
-            lastMarkers = (try? detector.detect(in: pixelBuffer, knownIDs: knownMarkerIDs)) ?? []
+            (lastMarkers, lastExtraPasses) = detectMarkers(in: pixelBuffer, now: now)
             lastDetectionMs = (CACurrentMediaTime() - start) * 1000
             lastUpdate = tracker.update(markers: lastMarkers, imageSize: imageSize, time: now)
             detected = true
@@ -124,7 +131,13 @@ final class FrameProcessor: ObservableObject {
         s.trackerState = tracker.state(at: now)
         s.isLocked = locked
         s.imageSize = imageSize
-        s.markers = lastMarkers
+        // 고정 중에는 검출을 하지 않으므로 오래된 마커 표시는 지운다.
+        s.markers = locked ? [] : lastMarkers
+        if !locked {
+            let found = Set(lastMarkers.map(\.id))
+            s.missingMarkerIDs = layout.markers.map(\.id).filter { !found.contains($0) }
+        }
+        s.extraPasses = locked ? 0 : lastExtraPasses
         s.reprojectionErrorPx = lastUpdate?.reprojectionErrorPx
         s.rejectedReason = locked ? nil : lastUpdate?.rejectedReason
         s.secondsSinceUpdate = tracker.lastUpdateTime.map { now - $0 }
@@ -136,6 +149,64 @@ final class FrameProcessor: ObservableObject {
         }
         DispatchQueue.main.async { self.snapshot = s }
     }
+
+    // MARK: - 마커 검출
+
+    /// 전체 프레임에서 찾고, 빠진 마커가 있으면 영역을 잘라 한 번 더 찾는다.
+    /// - Returns: 찾은 마커(ID당 신뢰도가 가장 높은 것)와 추가로 잘라 본 횟수
+    private func detectMarkers(in pixelBuffer: CVPixelBuffer, now: TimeInterval) -> ([DetectedMarker], Int) {
+        var found: [String: DetectedMarker] = [:]
+        func merge(_ markers: [DetectedMarker]) {
+            for marker in markers where (found[marker.id]?.confidence ?? -1) < marker.confidence {
+                found[marker.id] = marker
+            }
+        }
+
+        merge((try? detector.detect(in: pixelBuffer, knownIDs: knownMarkerIDs)) ?? [])
+        let regions = fallbackRegions(foundIDs: Set(found.keys), now: now)
+        for region in regions {
+            merge((try? detector.detect(in: pixelBuffer, region: region, knownIDs: knownMarkerIDs)) ?? [])
+        }
+        return (found.values.sorted { $0.id < $1.id }, regions.count)
+    }
+
+    /// 전체 프레임에서 못 찾은 마커를 다시 찾아볼 영역 (정규화 좌표, 좌상단 원점).
+    private func fallbackRegions(foundIDs: Set<String>, now: TimeInterval) -> [CGRect] {
+        let missing = layout.markers.filter { !foundIDs.contains($0.id) }
+        guard !missing.isEmpty else { return [] }
+
+        if let estimate = tracker.estimate {
+            // 종이 위치를 알면 빠진 마커가 있어야 할 자리 주변만 잘라 본다.
+            // 손에 가려진 경우엔 헛수고이므로 한 번에 최대 2곳만, 돌아가며 본다.
+            let regions: [CGRect] = missing.compactMap { marker in
+                let c = marker.centerPoint
+                let half = CGFloat(marker.size) * 0.9   // 마커 + 여백
+                let square = [CGPoint(x: c.x - half, y: c.y - half), CGPoint(x: c.x + half, y: c.y - half),
+                              CGPoint(x: c.x + half, y: c.y + half), CGPoint(x: c.x - half, y: c.y + half)]
+                guard let quad = estimate.project(square) else { return nil }
+                let xs = quad.map(\.x), ys = quad.map(\.y)
+                guard let minX = xs.min(), let maxX = xs.max(), let minY = ys.min(), let maxY = ys.max() else { return nil }
+                return CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+            }
+            guard !regions.isEmpty else { return [] }
+            let count = min(2, regions.count)
+            let start = fallbackCursor % regions.count
+            fallbackCursor += count
+            return (0..<count).map { regions[(start + $0) % regions.count] }
+        }
+
+        // 아직 종이를 못 찾았으면 화면을 겹치는 4조각으로 나눠 본다 (0.5초에 한 번만, 무거우므로).
+        guard foundIDs.count < 4, now - lastTileSearchTime >= 0.5 else { return [] }
+        lastTileSearchTime = now
+        return [
+            CGRect(x: 0, y: 0, width: 0.6, height: 0.6),
+            CGRect(x: 0.4, y: 0, width: 0.6, height: 0.6),
+            CGRect(x: 0, y: 0.4, width: 0.6, height: 0.6),
+            CGRect(x: 0.4, y: 0.4, width: 0.6, height: 0.6),
+        ]
+    }
+
+    // MARK: - 보정 이미지
 
     /// 종이 네 모서리를 펴서 종이 비율 그대로의 이미지로 만든다.
     private func makeRectifiedImage(from pixelBuffer: CVPixelBuffer, paperQuad: [CGPoint]) -> CGImage? {

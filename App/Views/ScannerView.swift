@@ -5,6 +5,7 @@ import UIKit
 struct ScannerView: View {
     @ObservedObject var camera: CameraManager
     @ObservedObject var processor: FrameProcessor
+    @State private var copiedDiagnostics = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -30,6 +31,10 @@ struct ScannerView: View {
         }
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
+        }
+        .onChange(of: camera.selectedCameraID) {
+            // 다른 카메라의 보정값은 의미가 없으므로 처음부터 다시 찾는다.
+            processor.reset()
         }
     }
 
@@ -102,9 +107,15 @@ struct ScannerView: View {
 
             GroupBox("종이 인식") {
                 VStack(alignment: .leading, spacing: 8) {
-                    LabeledContent("마커", value: "\(s.markers.count) / \(layout.markers.count)")
+                    LabeledContent("마커", value: s.isLocked ? "고정 중 (검출 안 함)" : "\(s.markers.count) / \(layout.markers.count)")
+                    if !s.missingMarkerIDs.isEmpty {
+                        Text("안 보이는 QR: \(Self.shortNames(s.missingMarkerIDs))")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                     LabeledContent("재투영 오차", value: s.reprojectionErrorPx.map { String(format: "%.2f px", $0) } ?? "-")
                     LabeledContent("검출 시간", value: s.detectionMs.map { String(format: "%.0f ms", $0) } ?? "-")
+                    LabeledContent("보조 검출", value: "\(s.extraPasses)회")
                     if let reason = s.rejectedReason {
                         Text(reason)
                             .font(.footnote)
@@ -128,6 +139,66 @@ struct ScannerView: View {
                     Label("인쇄용 종이 키보드 (PDF)", systemImage: "printer")
                 }
             }
+
+            Button {
+                UIPasteboard.general.string = diagnosticsText
+                copiedDiagnostics = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { copiedDiagnostics = false }
+            } label: {
+                Label(copiedDiagnostics ? "복사됨 — 채팅에 붙여 넣어 주세요" : "진단 정보 복사",
+                      systemImage: copiedDiagnostics ? "checkmark" : "doc.on.doc")
+            }
+        }
+    }
+
+    // MARK: - 진단 정보
+
+    /// 문제가 생겼을 때 그대로 붙여 넣으면 원인을 알 수 있도록 현재 상태를 글로 정리한다.
+    private var diagnosticsText: String {
+        let s = processor.snapshot
+        let state: String
+        if s.isLocked {
+            state = "고정됨"
+        } else {
+            switch s.trackerState {
+            case .searching: state = "찾는 중"
+            case .tracking: state = "추적 중"
+            case .holding: state = "유지 중"
+            }
+        }
+        func number(_ value: Double?, _ format: String) -> String {
+            value.map { String(format: format, $0) } ?? "-"
+        }
+        let cameraName = camera.selectedCameraName ?? "-"
+        let statusDetail = camera.statusMessage.map { " — " + $0.replacingOccurrences(of: "\n", with: " ") } ?? ""
+        let multitasking = camera.multitaskingCameraSupported ? "지원" : "미지원"
+        let fps = String(format: "%.0f", s.fps)
+        let missing = s.missingMarkerIDs.isEmpty ? "-" : Self.shortNames(s.missingMarkerIDs)
+        let lines = [
+            "[종이 키보드 진단]",
+            "기기: \(Self.deviceModelIdentifier) / iPadOS \(UIDevice.current.systemVersion)",
+            "카메라: \(cameraName) (\(camera.formatDescription))",
+            "카메라 상태: \(camera.statusSummary)\(statusDetail)",
+            "멀티태스킹 카메라: \(multitasking)",
+            "처리 FPS: \(fps) / 검출 시간: \(number(s.detectionMs, "%.0f ms")) / 보조 검출: \(s.extraPasses)회",
+            "이미지: \(Int(s.imageSize.width))×\(Int(s.imageSize.height))",
+            "추적: \(state) / 마커 \(s.markers.count)개 / 안 보임: \(missing)",
+            "재투영 오차: \(number(s.reprojectionErrorPx, "%.2f px")) / 거부 사유: \(s.rejectedReason ?? "-")",
+        ]
+        return lines.joined(separator: "\n")
+    }
+
+    /// "PK1-TL" → "TL"
+    private static func shortNames(_ ids: [String]) -> String {
+        ids.map { $0.split(separator: "-").last.map(String.init) ?? $0 }.joined(separator: ", ")
+    }
+
+    /// 예: "iPad16,3"
+    private static var deviceModelIdentifier: String {
+        var info = utsname()
+        uname(&info)
+        return withUnsafeBytes(of: &info.machine) { buffer in
+            String(decoding: buffer.prefix { $0 != 0 }, as: UTF8.self)
         }
     }
 }
